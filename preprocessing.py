@@ -71,3 +71,10 @@ if __name__ == "__main__":
     dic_list = []
     for _ in range(len(input_set)):
         dic_list.append({})
+
+    for i, B in enumerate(input_set):
+         for j, b in enumerate(B):
+             dic_list[i][b] = oneHotEncoding(input_count[i], j)
+
+print(input_count)
+print(input_set)
