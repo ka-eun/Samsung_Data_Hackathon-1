@@ -38,16 +38,15 @@ if __name__ == "__main__":
 
     for r, row in enumerate(inputs):
         inputs_by_attr.append([])
-        for j in range(3):
+        for _ in range(3):
             inputs_by_attr[r].append([])
         tmp = []
         count = 0
         for i, elem in enumerate(row):
             tmp.append(elem)
-            count += 1
-            if count<int(m/5):
+            if i<int(m/5):
                 inputs_by_attr[r][0].append(elem)
-            elif count<int(m-(m/5)):
+            elif i<int(m-(m/5)):
                 inputs_by_attr[r][1].append(elem)
             else:
                 inputs_by_attr[r][2].append(elem)
