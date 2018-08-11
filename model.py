@@ -1,55 +1,81 @@
 from preprocessing import preprocessing
 from keras.models import Sequential
 from keras.layers.core import Dense, Activation
-from keras.optimizers import SGD
+from keras.layers import concatenate
+from keras.layers import Input
+from keras.models import Model
 import matplotlib.pyplot as plt
 import numpy as np
+from pprint import pprint
+
 
 if __name__ == "__main__":
+    _inputs, outputs, _ = preprocessing()
 
-    '''
-    model = Sequential()
-    model.add(Dense(12, input_dim=8, activation='relu'))
-    model.add(Dense(8, activation='relu'))
-    model.add(Dense(1, activation='sigmoid'))
-    '''
-
-    input, output, _ = preprocessing()
-
-    model = Sequential()
-    model.add(Dense(100, input_dim=len(input[0]), activation='relu'))
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(100, activation='relu'))
-    model.add(Dense(len(output[0]), activation='relu'))
+    n = len(outputs)
+    output_test = (outputs[:int(n / 5)])
+    output_train = (outputs[int(n / 5):n - int(n / 5)])
+    output_validation = (outputs[n - int(n / 5):])
 
 
-    n=len(input)
+    # 한 row의 elem 개수만큼 append
+    N = len(_inputs[0])
 
-    input_test=np.array(input[:int(n/5)])
-    input_train=np.array(input[int(n/5):n-int(n/5)])
-    input_validation=np.array(input[n-int(n/5):])
+    inputs = []
+    for _ in range(N):
+        inputs.append([])
 
-    n = len(output)
-    output_test = np.array(output[:int(n / 5)])
-    output_train = np.array(output[int(n / 5):n - int(n / 5)])
-    output_validation = np.array(output[n - int(n / 5):])
+    #
+    for _input in _inputs:
+        for i, elem in enumerate(_input):
+            inputs[i].append(elem)
+
+    # inputs: attribute에 따라 생성한 list
+
+    models = []
+    _models = []
+
+    for input in inputs:
+        model = Input(shape=(len(input[0]),))
+
+        models.append(model)
+
+    x = concatenate(models)
+    x = Dense(64, activation='relu')(x)
+    # x = Dense(64, activation='relu')(x)
+    # x = Dense(64, activation='relu')(x)
+    x = Dense(len(outputs[0]), activation='relu')(x)
+
+
+    model = Model(inputs=models, outputs=x)
 
     model.compile(loss="mse", optimizer="adam", metrics=['accuracy'])
     model.summary()
 
-
-    hist = model.fit(input_train,output_train,
-                     epochs=1000,batch_size=32,
-                     validation_data=(input_validation,output_validation),
+    hist = model.fit([np.array(i) for i in inputs], np.array(outputs),
+                     epochs=10, batch_size=32,
                      verbose=2)
 
-    scores = model.evaluate(input_test,output_test,verbose=2)
-    print(scores)
 
 
 
+    """
+    model = Sequential()
+    model.add(Dense(100, input_dim=len(input_test[0]), activation='relu'))
+    model.add(Dense(100, activation='relu'))
+    model.add(Dense(100, activation='relu'))
+    model.add(Dense(len(output_test[0]), activation='relu'))
 
+    model.compile(loss="mse", optimizer="adam", metrics=['accuracy'])
+    model.summary()
 
+    hist = model.fit(input_train, output_train,
+                     epochs=10, batch_size=32,
+                     validation_data=(input_validation, output_validation),
+                     verbose=2)
 
+    scores = model.evaluate(input_test, output_test, verbose=2)
+    print('complete: %s = %.2f%%' % (model.metrics_names[1], scores[1] * 100))
 
-
+    print(model.predict(input_test))
+    """
