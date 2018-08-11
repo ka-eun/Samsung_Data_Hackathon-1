@@ -1,4 +1,4 @@
-import csv
+import csv  # comma로 분리된 데이터를 읽고 쓰기 위한 모듈
 
 f=open('C:\Users\user\Downloads\dataset_kor\교통사망사고정보\Kor_Train_교통사망사고정보(12.1~17.6).csv')
 r=csv.reader(f)
