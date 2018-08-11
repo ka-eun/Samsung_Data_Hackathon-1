@@ -1,9 +1,10 @@
 import csv  # comma로 분리된 데이터를 읽고 쓰기 위한 모듈
+from pprint import pprint
 
-f=open('C:\Users\user\Downloads\dataset_kor\교통사망사고정보\Kor_Train_교통사망사고정보(12.1~17.6).csv')
+f=open('./교통사망사고정보\Kor_Train_교통사망사고정보(12.1~17.6).csv')
 r=csv.reader(f)
 
-f2=open('C:\Users\user\Downloads\test_kor.csv')
+f2=open('./test_kor.csv')
 r2=csv.reader(f2)
 
 attr_test = []
@@ -35,7 +36,7 @@ for row in r:   #교통사망정보 열 별로(맨 처음 row였던 자료 분�
         if i < 2:
             input.append(elem)
         elif i < 7:
-            output.append(elem)
+            output.append(int(elem))
         else:
             input.append(elem)
 
@@ -44,3 +45,20 @@ for row in r:   #교통사망정보 열 별로(맨 처음 row였던 자료 분�
 
 f.close()
 f2.close()
+
+
+tmp = []
+for i in range(len(input_train[0])):
+    tmp.append([])
+
+for row in input_train:
+    for i, elem in enumerate(row):
+        tmp[i].append(elem)
+
+input_count = []
+for c in tmp:
+    input_count.append(len(set(c)))
+
+
+
+print(input_count)
