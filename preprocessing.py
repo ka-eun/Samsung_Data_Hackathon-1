@@ -8,11 +8,11 @@ def oneHotEncoding(length, index):
     vector[index] = 1
     return vector
 
-if __name__ == "__main__":
-    f=open('./교통사망사고정보\Kor_Train_교통사망사고정보(12.1~17.6).csv')
+def preprocessing(file_train='./교통사망사고정보\Kor_Train_교통사망사고정보(12.1~17.6).csv', file_test='./test_kor.csv'):
+    f=open(file_train, 'r')
     r=csv.reader(f)
 
-    f2=open('./test_kor.csv')
+    f2=open(file_test)
     r2=csv.reader(f2)
 
     attr_test = []
@@ -27,7 +27,7 @@ if __name__ == "__main__":
             attr_train.append(elem)
         break
 
-    input_train = []    #사람 수 데이타를 제외한 인풋 정보
+    _input_train = []    #사람 수 데이타를 제외한 인풋 정보
     output_train = []   #사람 수 데이터(사망자, 사상자, 중상자,  경상자,부상신고자의 수)
 
     #위에서 row로 반복문을 돌려서 맨처음 row인 자료 정보 분류는 불포함하여 반복문을 돌림
@@ -48,25 +48,32 @@ if __name__ == "__main__":
             else:
                 input.append(elem)
 
-        input_train.append(input)
+        _input_train.append(input)
         output_train.append(output)
 
     f.close()
     f2.close()
 
     tmp = []
-    for i in range(len(input_train[0])):
+    for i in range(len(_input_train[0])):
         tmp.append([])
 
-    for row in input_train:
+    for row in _input_train:
         for i, elem in enumerate(row):
             tmp[i].append(elem)
 
     input_count = []
     input_set = []
-    for c in tmp:
-        input_count.append(len(set(c)))
-        input_set.append(set(c))
+    for i, c in enumerate(tmp):
+        if i==(len(tmp)-2):
+            input_count.append(len(set(c) | set(tmp[i+1])))
+            input_set.append(set(c) | set(tmp[i+1]))  # union
+            break
+        else:
+            input_count.append(len(set(c)))
+            input_set.append(set(c))
+
+
 
     dic_list = []
     for _ in range(len(input_set)):
@@ -76,5 +83,20 @@ if __name__ == "__main__":
          for j, b in enumerate(B):
              dic_list[i][b] = oneHotEncoding(input_count[i], j)
 
-print(input_count)
-print(input_set)
+    dic_list.append(dic_list[len(dic_list)-1])
+
+
+    input_train = []
+    for i, row in enumerate(_input_train):
+        input_train.append([])
+        for j, elem in enumerate(row):
+            input_train[i].append(dic_list[j][elem])
+
+    return input_train, output_train, dic_list
+
+if __name__ == "__main__":
+    train_input, train_output, dicts = preprocessing()
+    print(train_input)
+    print(train_output)
+    print(dicts)
+    
