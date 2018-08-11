@@ -13,10 +13,6 @@ if __name__ == "__main__":
     _inputs, outputs, _ = preprocessing()
 
     n = len(outputs)
-    output_test = (outputs[:int(n / 5)])
-    output_train = (outputs[int(n / 5):n - int(n / 5)])
-    output_validation = (outputs[n - int(n / 5):])
-
 
     # 한 row의 elem 개수만큼 append
     N = len(_inputs[0])
@@ -34,6 +30,31 @@ if __name__ == "__main__":
 
     models = []
     _models = []
+
+    inputs_by_attr = []
+
+    n = len(inputs)  # 속성의 개수
+    m = len(inputs[0])
+
+    for r, row in enumerate(inputs):
+        inputs_by_attr.append([])
+        for j in range(3):
+            inputs_by_attr[r].append([])
+        tmp = []
+        count = 0
+        for i, elem in enumerate(row):
+            tmp.append(elem)
+            count += 1
+            if count<int(m/5):
+                inputs_by_attr[r][0].append(elem)
+            elif count<int(m-(m/5)):
+                inputs_by_attr[r][1].append(elem)
+            else:
+                inputs_by_attr[r][2].append(elem)
+
+    pprint(inputs_by_attr)
+
+'''
 
     for input in inputs:
         model = Input(shape=(len(input[0]),))
@@ -79,3 +100,4 @@ if __name__ == "__main__":
 
     print(model.predict(input_test))
     """
+'''
