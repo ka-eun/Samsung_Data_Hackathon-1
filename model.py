@@ -9,9 +9,8 @@ import numpy as np
 from pprint import pprint
 
 
-if __name__ == "__main__":
-    _inputs, outputs, _ = preprocessing()
-
+def separateSet(_inputs, _outputs):
+    # inputs: attribute에 따라 생성한 list
     inputs = []
     for _ in range(len(_inputs[0])):
         inputs.append([])
@@ -20,14 +19,9 @@ if __name__ == "__main__":
         for i, elem in enumerate(_input):
             inputs[i].append(elem)
 
-    # inputs: attribute에 따라 생성한 list
-
-
-
-
+    # train, test, validation
     inputs_by_attr = []
 
-    # train, test, validation
     for _ in range(3):
         inputs_by_attr.append([])
 
@@ -37,12 +31,22 @@ if __name__ == "__main__":
         inputs_by_attr[1].append(col[int(n / 5):n - int(n / 5)])  # train
         inputs_by_attr[2].append(col[n - int(n / 5):])  # validation
 
-    n = len(outputs)
-    output_test = (outputs[:int(n / 5)])
-    output_train = (outputs[int(n / 5):n - int(n / 5)])
-    output_validation = (outputs[n - int(n / 5):])
+    n = len(_outputs)
+    output_test = (_outputs[:int(n / 5)])
+    output_train = (_outputs[int(n / 5):n - int(n / 5)])
+    output_validation = (_outputs[n - int(n / 5):])
+
+    return inputs, _outputs,\
+           inputs_by_attr[0], inputs_by_attr[1], inputs_by_attr[2],\
+           output_test, output_train, output_validation
 
 
+if __name__ == "__main__":
+    _inputs, _outputs, _ = preprocessing()
+    inputs, outputs, input_test, input_train, input_val, output_test, output_train, output_val = separateSet(_inputs, _outputs)
+
+    """
+    """
     models = []
 
     for input in inputs:
@@ -69,10 +73,10 @@ if __name__ == "__main__":
     model.compile(loss="mse", optimizer="adam", metrics=['accuracy'])
     model.summary()
 
-    hist = model.fit([np.array(i) for i in inputs_by_attr[1]], np.array(output_train),
-                     epochs=1000, batch_size=64,
-                     validation_data=([np.array(i) for i in inputs_by_attr[2]], np.array(output_validation)),
+    hist = model.fit([np.array(i) for i in input_train], np.array(output_train),
+                     epochs=10, batch_size=64,
+                     validation_data=([np.array(i) for i in input_val], np.array(output_val)),
                      verbose=2)
 
-    scores = model.evaluate([np.array(i) for i in inputs_by_attr[0]], np.array(output_test), verbose=2)
+    scores = model.evaluate([np.array(i) for i in input_test], np.array(output_test), verbose=2)
     print('complete: %s = %.2f%%' % (model.metrics_names[1], scores[1] * 100))
