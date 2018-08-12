@@ -7,7 +7,8 @@ from keras.models import Model
 import matplotlib.pyplot as plt
 import numpy as np
 from pprint import pprint
-
+import random
+SEED = 448
 
 def separateSet(_inputs, _outputs):
     # inputs: attribute에 따라 생성한 list
@@ -40,9 +41,16 @@ def separateSet(_inputs, _outputs):
            inputs_by_attr[0], inputs_by_attr[1], inputs_by_attr[2],\
            output_test, output_train, output_validation
 
+def shuffleList(input, output):
+    random.Random(SEED).shuffle(input)
+    random.Random(SEED).shuffle(output)
+    return input, output
+
+
 
 if __name__ == "__main__":
     _inputs, _outputs, _ = preprocessing()
+    _inputs, _outputs = shuffleList(_inputs, _outputs)
     inputs, outputs, input_test, input_train, input_val, output_test, output_train, output_val = separateSet(_inputs, _outputs)
 
     """
