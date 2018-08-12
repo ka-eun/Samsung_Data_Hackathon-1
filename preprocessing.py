@@ -55,7 +55,9 @@ def preprocessing(file_train='./교통사망사고정보\Kor_Train_교통사망�
 
     f.close()
     f2.close()
-
+    
+    """
+    """
     tmp = []
     for i in range(len(_input_train[0])):
         tmp.append([])  # _input_train의 attribute 개수만큼 list 생성
@@ -74,9 +76,7 @@ def preprocessing(file_train='./교통사망사고정보\Kor_Train_교통사망�
         else:
             input_count.append(len(set(c)))  # 각 attribute가 가지는 중복되지 않는 element의 수를 input_count list에 저장
             input_set.append(set(c))  # tmp의 각 리스트를 set으로 변환하여 input_set에 저장
-
-
-
+            
     dic_list = []
     for _ in range(len(input_set)):  # file_train의 attribute 개수만큼 dictionary 생성
         dic_list.append({})
@@ -87,7 +87,8 @@ def preprocessing(file_train='./교통사망사고정보\Kor_Train_교통사망�
 
     dic_list.append(dic_list[len(dic_list)-1])  # input_count와 크기를 맞춰주기 위해 마지막번째 attribute에 병합된 set을 추가
 
-
+    """
+    """
     input_train = []  # 사람 수 데이타를 제외한 input을 벡터화한 list
     for i, row in enumerate(_input_train):
         input_train.append([])
@@ -95,6 +96,7 @@ def preprocessing(file_train='./교통사망사고정보\Kor_Train_교통사망�
             input_train[i].append(dic_list[j][elem])  
 
     return input_train, output_train, dic_list
+
 
 if __name__ == "__main__":
     train_input, train_output, dicts = preprocessing()
