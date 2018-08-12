@@ -10,7 +10,7 @@ def oneHotEncoding(length, index):
     vector[index] = 1
     return vector
 
-def preprocessing(file_train='./교통사망사고정보\Kor_Train_교통사망사고정보(12.1~17.6).csv', file_test='./test_kor.csv'):
+def preprocessing(file_train='./Kor_Train_교통사망사고정보(12.1~17.6).csv', file_test='./test_kor.csv'):
     f=open(file_train, 'r')
     r=csv.reader(f)
 
