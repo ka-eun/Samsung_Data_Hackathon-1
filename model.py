@@ -90,3 +90,6 @@ if __name__ == "__main__":
 
     scores = model.evaluate([np.array(i) for i in input_test], np.array(output_test), verbose=2)
     print('complete: %s = %.2f%%' % (model.metrics_names[1], scores[1] * 100))
+
+    # predict
+    print(model.predict([np.array(i) for i in input_test]))
