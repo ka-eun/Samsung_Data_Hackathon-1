@@ -8,7 +8,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pprint import pprint
 import random
+
+
 SEED = 448
+
 
 def separateSet(_inputs, _outputs):
     # inputs: attribute에 따라 생성한 list
@@ -41,11 +44,10 @@ def separateSet(_inputs, _outputs):
            inputs_by_attr[0], inputs_by_attr[1], inputs_by_attr[2],\
            output_test, output_train, output_validation
 
-def shuffleList(input, output):
-    random.Random(SEED).shuffle(input)
-    random.Random(SEED).shuffle(output)
-    return input, output
-
+def shuffleList(_input, _output):
+    random.Random(SEED).shuffle(_input)
+    random.Random(SEED).shuffle(_output)
+    return _input, _output
 
 
 if __name__ == "__main__":
