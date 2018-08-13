@@ -1,4 +1,4 @@
-from preprocessing import preprocessing
+from preprocessing import preprocessing, shuffleList, deleteColumn
 from keras.models import Sequential
 from keras.layers.core import Dense, Activation, Dropout
 from keras.layers import concatenate, BatchNormalization
@@ -6,12 +6,11 @@ from keras.layers import Input
 from keras.models import Model
 import matplotlib.pyplot as plt
 import numpy as np
+import tensorflow as tf
 from pprint import pprint
-import random
 
 
-SEED = 448
-np.random.seed(SEED)
+# np.random.seed(SEED)
 # random.seed(SEED)
 
 
@@ -47,53 +46,48 @@ def separateSet(_inputs, _outputs):
            output_test, output_train, output_validation
 
 
-def shuffleList(_input, _output):
-    random.Random(SEED).shuffle(_input)
-    random.Random(SEED).shuffle(_output)
-    return _input, _output
-
-
 def createModel(inputs):
     # inputs
     models = []
-
     for input in inputs:
         model = Input(shape=(len(input[0]),))
-
         models.append(model)
 
     # more layers for each one-hot encoding vector
     _models = []
     for model in models:
-        model = Dense(128, activation='relu')(model)
-        model = Dropout(0.25)(model)
+        """
+        """
+        model = BatchNormalization()(model)
 
-        model = Dense(128, activation='relu')(model)
-        model = Dense(1, activation='linear')(model)
+        # x = Dense(200, kernel_initializer='he_normal')(x)
+        # x = Activation('relu')(x)
+        # x = BatchNormalization()(x)
 
+        # collect refined model
         _models.append(model)
 
+    # merge
     x = concatenate(_models)
 
-    x = Dense(128, activation='relu')(x)
-    x = Dropout(0.25)(x)
-
-    x = Dense(128, activation='relu')(x)
-
-    x = Dense(len(outputs[0]), activation='relu')(x)
-
-    """
+    x = Dense(200, kernel_initializer='he_normal')(x)
+    x = Activation('relu')(x)
     x = BatchNormalization()(x)
-    x = Dropout(0.25)(x)
-    """
+    # x = Dropout(0.5)(x)
 
-    model = Model(inputs=models, outputs=x)
+    x = Dense(len(outputs[0]))(x)
+    x = Activation('relu')(x)
 
-    return model
+    return Model(inputs=models, outputs=x)
 
 
 if __name__ == "__main__":
     _inputs, _outputs, _ = preprocessing()
+
+    # delete columns
+    _inputs = deleteColumn(_inputs, [7, 9, 12])
+    _outputs = deleteColumn(_outputs, [2])
+
     _inputs, _outputs = shuffleList(_inputs, _outputs)
     inputs, outputs, input_test, input_train, input_val, output_test, output_train, output_val\
         = separateSet(_inputs, _outputs)
@@ -112,7 +106,7 @@ if __name__ == "__main__":
 
     # train
     hist = model.fit([np.array(i) for i in input_train], np.array(output_train),
-                     epochs=100, batch_size=64,
+                     epochs=1000, batch_size=1024,
                      validation_data=([np.array(i) for i in input_val], np.array(output_val)),
                      verbose=2)
 
@@ -121,4 +115,12 @@ if __name__ == "__main__":
     print('complete: %s = %.2f%%' % (model.metrics_names[1], scores[1] * 100))
 
     # predict
-    print(model.predict([np.array(i) for i in input_test]))
+    _preds = model.predict([np.array(i) for i in input_test])
+
+    preds = []
+    for i, _pred in enumerate(_preds):
+        preds.append([])
+        for val in _pred:
+            preds[i].append(int(max(0, round(val))))
+
+    print(preds)
