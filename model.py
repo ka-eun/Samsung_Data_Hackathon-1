@@ -58,11 +58,9 @@ def createModel(inputs):
     for model in models:
         """
         """
-        model = BatchNormalization()(model)
-
         # x = Dense(200, kernel_initializer='he_normal')(x)
-        # x = Activation('relu')(x)
         # x = BatchNormalization()(x)
+        # x = Activation('relu')(x)
 
         # collect refined model
         _models.append(model)
@@ -71,8 +69,8 @@ def createModel(inputs):
     x = concatenate(_models)
 
     x = Dense(200, kernel_initializer='he_normal')(x)
-    x = Activation('relu')(x)
     x = BatchNormalization()(x)
+    x = Activation('relu')(x)
     # x = Dropout(0.5)(x)
 
     x = Dense(len(outputs[0]))(x)
