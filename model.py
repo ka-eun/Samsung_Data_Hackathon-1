@@ -71,7 +71,7 @@ def createModel(inputs):
     x = Dense(200, kernel_initializer='he_normal')(x)
     x = BatchNormalization()(x)
     x = Activation('relu')(x)
-    # x = Dropout(0.5)(x)
+    x = Dropout(0.2)(x)
 
     x = Dense(len(outputs[0]))(x)
     x = Activation('relu')(x)
@@ -104,7 +104,7 @@ if __name__ == "__main__":
 
     # train
     hist = model.fit([np.array(i) for i in input_train], np.array(output_train),
-                     epochs=1000, batch_size=1024,
+                     epochs=100, batch_size=8192,
                      validation_data=([np.array(i) for i in input_val], np.array(output_val)),
                      verbose=2)
 
