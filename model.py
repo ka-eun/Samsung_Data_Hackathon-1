@@ -4,13 +4,15 @@ from keras.layers.core import Dense, Activation, Dropout
 from keras.layers import concatenate, BatchNormalization
 from keras.layers import Input
 from keras.models import Model
-import matplotlib.pyplot as plt
 import numpy as np
 import tensorflow as tf
+import matplotlib.pyplot as plt
 from pprint import pprint
 
 
-# np.random.seed(SEED)
+SEED = 448
+np.random.seed(SEED)
+tf.set_random_seed(SEED)
 # random.seed(SEED)
 
 
@@ -70,7 +72,7 @@ def createModel(inputs):
 
     x = Dense(200, kernel_initializer='he_normal')(x)
     x = BatchNormalization()(x)
-    x = Activation('relu')(x)
+    x = Activation('elu')(x)
     x = Dropout(0.2)(x)
 
     x = Dense(len(outputs[0]))(x)
@@ -104,7 +106,7 @@ if __name__ == "__main__":
 
     # train
     hist = model.fit([np.array(i) for i in input_train], np.array(output_train),
-                     epochs=100, batch_size=8192,
+                     epochs=10, batch_size=8192,
                      validation_data=([np.array(i) for i in input_val], np.array(output_val)),
                      verbose=2)
 
