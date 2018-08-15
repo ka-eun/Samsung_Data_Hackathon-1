@@ -1,5 +1,14 @@
 import csv  # comma로 분리된 데이터를 읽고 쓰기 위한 모듈
 from pprint import pprint
+import random
+
+
+def shuffleList(_input, _output):
+    SEED = 448
+
+    random.Random(SEED).shuffle(_input)
+    random.Random(SEED).shuffle(_output)
+    return _input, _output
 
 
 # 클래스를 orthonormal vector화하는 함수
@@ -99,6 +108,18 @@ def preprocessing(file_train='./Kor_Train_교통사망사고정보(12.1~17.6).cs
             input_train[i].append(dic_list[j][elem])
 
     return input_train, output_train, dic_list
+
+
+def deleteColumn(rows, stopIdx):
+    tmp = []
+    for row in rows:
+        refined = []
+        for i, elem in enumerate(row):
+            if i not in stopIdx:
+                refined.append(elem)
+        tmp.append(refined)
+
+    return tmp
 
 
 if __name__ == "__main__":
