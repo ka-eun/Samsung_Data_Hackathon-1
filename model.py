@@ -187,7 +187,7 @@ if __name__ == "__main__":
         = separateSet(_inputs, _outputs)  # 범주형 데이터와 사람 수 데이터를 각각 test, train, validate를 위해 분류
 
     # for ensemble model
-    num_models = 5
+    num_models = 20
     models = []
 
     # model의 개수만큼 model 생성
@@ -231,23 +231,22 @@ if __name__ == "__main__":
         # print('complete: %s = %.2f%%' % (model.metrics_names[1], score[1] * 100))
         scores.append(score)
 
-        # Threshold 0.8
-        if score[1] <= 0.8:
-            print('fail: model', j)
+        """
+        predict
+        """
+        _preds = model.predict([np.array(i) for i in input_test])
 
+        preds = []
+        for i, _pred in enumerate(_preds):
+            preds.append([])
+            for val in _pred:
+                # 반올림된 예측값이 0보다 클 경우 preds 리스트에 추가, 음수일경우 0을 추가
+                preds[i].append(int(max(0, round(val))))
+                
+        # Threshold
+        if score[1] <= 0.9:
+            print('fail    : model %d: %.2f%%' % (j, evaluate_lists(preds, output_test) * 100))
         else:
-            """
-            predict
-            """
-            _preds = model.predict([np.array(i) for i in input_test])
-
-            preds = []
-            for i, _pred in enumerate(_preds):
-                preds.append([])
-                for val in _pred:
-                    # 반올림된 예측값이 0보다 클 경우 preds 리스트에 추가, 음수일경우 0을 추가
-                    preds[i].append(int(max(0, round(val))))
-
             predicts.append(preds)
 
             # 예측값과 실제output값을 비교한 compare_lists를 해당 리스트의 row길이, 개수만큼 나누어 정확도를 구함
