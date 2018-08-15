@@ -3,6 +3,7 @@ from keras.layers.core import Dense, Activation, Dropout
 from keras.callbacks import EarlyStopping
 from keras.layers import concatenate, Input, BatchNormalization, PReLU
 from keras.models import Model, Sequential
+from keras.utils.vis_utils import plot_model
 import numpy as np
 import tensorflow as tf
 import matplotlib.pyplot as plt
@@ -44,11 +45,13 @@ def plot_hist(hist):
 def separateSet(_inputs, _outputs):
     # inputs: attribute에 따라 생성한 list
     inputs = []
-    for _ in range(len(_inputs[0])):  #inputs의 원소로 attr의 개수만큼의 리스트를 만듬
+    for _ in range(len(_inputs[0])):
+        #inputs의 원소로 attr의 개수만큼의 리스트를 만듬
         inputs.append([])
 
     for _input in _inputs:
-        for i, elem in enumerate(_input):  #_inputs 속성별로 재분류해서 inputs에
+        for i, elem in enumerate(_input):
+            #_inputs 속성별로 재분류해서 inputs에
             inputs[i].append(elem)
 
     # train, test, validation
@@ -60,20 +63,21 @@ def separateSet(_inputs, _outputs):
     for i, col in enumerate(inputs):
         n = len(col)
         inputs_by_attr[0].append(col[:int(n / 10)])  # test
-        inputs_by_attr[1].append(col[int(n / 10):n - int(n / 5)])  # train
-        inputs_by_attr[2].append(col[n - int(n / 5):])  # validation
+        inputs_by_attr[1].append(col[int(n / 10):n - int(n / 10)])  # train
+        inputs_by_attr[2].append(col[n - int(n / 10):])  # validation
 
     n = len(_outputs)
     output_test = (_outputs[:int(n / 10)])
-    output_train = (_outputs[int(n / 10):n - int(n / 5)])
-    output_validation = (_outputs[n - int(n / 5):])
+    output_train = (_outputs[int(n / 10):n - int(n / 10)])
+    output_validation = (_outputs[n - int(n / 10):])
 
     return inputs, _outputs,\
            inputs_by_attr[0], inputs_by_attr[1], inputs_by_attr[2],\
            output_test, output_train, output_validation
 
 
-def majority(votes):  #만들어진 모델들에 대해서 다수결 투표하는 함수
+def majority(votes):
+    #만들어진 모델들에 대해서 다수결 투표하는 함수
     # 투표 개수를 세어서 표결수가 큰 순서대로 정렬한 후 가장 많은 표를 받은 키값
     # 투표 개수를 세어서 표결수가 큰 순서대로 정렬한 후 가장 많은 표를 받은 키값의 표결수를 투표자 수로 나눔. 즉 비율
     return sorted(Counter(votes).items(), key=operator.itemgetter(1), reverse=True)[0][0],\
@@ -94,7 +98,6 @@ def evaluate_lists(n, m):
     return res / (len(n) * len(n[0]))
 
 
-# TO DO: ensemble
 def createModel(inputs):
     # inputs
     models = []
@@ -122,7 +125,8 @@ def createModel(inputs):
                 #배치 정규화:입력값이 너무 차이가 나지 않게 입력값 정규화해서 넘겨줌(매 층마다 정규화)
                 model = Dense(round(len(inputs[i][0])*(random.random()+1.0)), kernel_initializer='he_normal')(model)  # default node number = 200
                 model = BatchNormalization()(model)
-                model = Activation(random.choice(['elu', 'relu']))(model)
+                activation = random.choice(['elu', 'relu'])
+                model = Activation(activation, name=activation+'_'+str(i))(model)
 
             # PReLU
             elif rand == 1:
@@ -134,7 +138,7 @@ def createModel(inputs):
             else:
                 model = Dense(round(len(inputs[i][0])*(random.random()+1.0)), kernel_initializer='glorot_normal')(model)  # default node number = 200
                 model = BatchNormalization()(model)
-                model = Activation('tanh')(model)
+                model = Activation('tanh', name='tanh_'+str(i))(model)
 
         # collect refined model
         _models.append(model)
@@ -145,14 +149,17 @@ def createModel(inputs):
     """
     random parts for ensemble
     """
-    for _ in range(random.randrange(1, 3)):
+    tot = i
+
+    for i in range(random.randrange(1, 3)):
         rand = random.randrange(3)
 
         # relu, elu
         if rand == 0:
             x = Dense(random.randrange(100, 400), kernel_initializer='he_normal')(x)  # default node number = 200
             x = BatchNormalization()(x)
-            x = Activation(random.choice(['elu', 'relu']))(x)
+            activation = random.choice(['elu', 'relu'])
+            x = Activation(activation, name=activation+'_'+str(i+tot+1))(x)
 
         # PReLU
         elif rand == 1:
@@ -164,13 +171,13 @@ def createModel(inputs):
         else:
             x = Dense(random.randrange(100, 400), kernel_initializer='glorot_normal')(x)  # default node number = 200
             x = BatchNormalization()(x)
-            x = Activation('tanh')(x)
+            x = Activation('tanh', name='tanh_'+str(i+tot+1))(x)
 
     # x = Dropout(0.2)(x)
 
     # output
     x = Dense(len(outputs[0]))(x)
-    x = Activation('relu')(x)
+    x = Activation('relu', name='relu_'+str(i+tot+2))(x)
 
     return Model(inputs=models, outputs=x)
 
@@ -211,7 +218,7 @@ if __name__ == "__main__":
 
         # early stopping
         # val_acc값이 5번 동안 향상되지 않으면 해당 model의 학습을 중단
-        early_stopping = EarlyStopping(monitor='val_acc', patience=5, verbose=0)
+        early_stopping = EarlyStopping(monitor='val_acc', patience=5, verbose=2)
 
         # train
         # model의 학습 이력 정보로 train의 loss와 accuracy, val의 loss와 accuracy 값을 받음
@@ -219,7 +226,7 @@ if __name__ == "__main__":
                          epochs=100, batch_size=pow(2, 13),
                          validation_data=([np.array(i) for i in input_val], np.array(output_val)),
                          callbacks=[early_stopping],
-                         verbose=0)
+                         verbose=2)
 
         # plot_hist(hist)
 
@@ -251,6 +258,7 @@ if __name__ == "__main__":
         else:
             scores.append(score)
             predicts.append(preds)
+            plot_model(model, to_file='./models/model_plot_'+str(j)+'.png', show_shapes=True, show_layer_names=True)
 
             # 예측값과 실제output값을 비교한 compare_lists를 해당 리스트의 row길이, 개수만큼 나누어 정확도를 구함
             print('complete: model %d: %.2f%%' % (j, res * 100))
