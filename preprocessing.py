@@ -11,6 +11,52 @@ def shuffleList(_input, _output):
     return _input, _output
 
 
+def createTrainFile(file_train='./Kor_Train_교통사망사고정보(12.1~17.6).csv', file_test='./test_kor.csv'):
+    f = open(file_train, 'r')
+    r = csv.reader(f)
+    f2 = open(file_test)
+    r2 = csv.reader(f2)
+    f3 = open('./train_kor.csv', 'w', newline='')
+    wr = csv.writer(f3)
+
+    attr_test = []
+    attr_row = []
+    for i, row in enumerate(r2):  # test_kor를 열 별로
+        if i==0:
+            attr_row.append(row)
+        for elem in row:  # test_kor를 열의 원소 별로
+            attr_test.append(elem)
+        break
+
+    attr_train = []
+    for row in r:  # 교통사망정보(트레이닝.csv) 열 별로
+        for elem in row:  # 교통사망정보 열의 원소 별로
+            attr_train.append(elem)
+        break
+
+    total_train = []
+
+    # 위에서 row로 반복문을 돌려서 맨처음 row인 자료 정보 분류는 불포함하여 반복문을 돌림
+    for row in r:  # 교통사망정보 열 별로(맨 처음 row였던 자료 분류는 불포함)
+        tmp = []
+        for i, elem in enumerate(row):  # 교통사망정보 열만큼 돌림
+            if attr_train[i] in attr_test:  # 교통사망정보 열의 원소 중 test_kor와 일치하는 원소만 append
+                tmp.append(elem)
+
+        total = []
+        for elem in tmp:
+            total.append(elem)
+        total_train.append(total)
+
+    wr.writerow(attr_row[0])
+    for row in total_train:
+       wr.writerow(row)
+
+    f.close()
+    f2.close()
+    f3.close()
+
+
 # 클래스를 orthonormal vector화하는 함수
 # 서로 직교하며 크기가 1로 같은 orthonormal vector를 사용하여 input data를 수치화함
 def oneHotEncoding(length, index):
@@ -29,7 +75,10 @@ def preprocessing(file_train='./Kor_Train_교통사망사고정보(12.1~17.6).cs
     r2 = csv.reader(f2)
 
     attr_test = []
-    for row in r2:  # test_kor를 열 별로
+    attr_row = []
+    for i, row in enumerate(r2):  # test_kor를 열 별로
+        if i==0:
+            attr_row.append(row)
         for elem in row:  # test_kor를 열의 원소 별로
             attr_test.append(elem)
         break
@@ -53,7 +102,7 @@ def preprocessing(file_train='./Kor_Train_교통사망사고정보(12.1~17.6).cs
         input = []
         output = []
 
-        for i, elem in enumerate(tmp):  # 인덱스로 인풋 아웃풋 분류(2<=인풋<=7)
+        for i, elem in enumerate(tmp):  # 인덱스로 인풋 아웃풋 분류(2<output<7)
             if i < 2:
                 input.append(elem)
             elif i < 7:
@@ -66,7 +115,6 @@ def preprocessing(file_train='./Kor_Train_교통사망사고정보(12.1~17.6).cs
 
     f.close()
     f2.close()
-
     """
     """
     tmp = []
@@ -126,6 +174,7 @@ def deleteColumn(rows, stopIdx):
 
 if __name__ == "__main__":
     train_input, train_output, dicts = preprocessing()
+    createTrainFile()
     print(train_input)
     print(train_output)
     print(dicts)
