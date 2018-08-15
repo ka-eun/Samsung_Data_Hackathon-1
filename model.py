@@ -229,7 +229,6 @@ if __name__ == "__main__":
         # model의 성능 평가
         score = model.evaluate([np.array(i) for i in input_test], np.array(output_test), verbose=0)
         # print('complete: %s = %.2f%%' % (model.metrics_names[1], score[1] * 100))
-        scores.append(score)
 
         """
         predict
@@ -242,15 +241,19 @@ if __name__ == "__main__":
             for val in _pred:
                 # 반올림된 예측값이 0보다 클 경우 preds 리스트에 추가, 음수일경우 0을 추가
                 preds[i].append(int(max(0, round(val))))
-                
+
+        # 성능 평가
+        res = evaluate_lists(preds, output_test)
+
         # Threshold
-        if score[1] <= 0.9:
-            print('fail    : model %d: %.2f%%' % (j, evaluate_lists(preds, output_test) * 100))
+        if res <= 0.9:
+            print('fail    : model %d: %.2f%%' % (j, res * 100))
         else:
+            scores.append(score)
             predicts.append(preds)
 
             # 예측값과 실제output값을 비교한 compare_lists를 해당 리스트의 row길이, 개수만큼 나누어 정확도를 구함
-            print('complete: model %d: %.2f%%' % (j, evaluate_lists(preds, output_test) * 100))
+            print('complete: model %d: %.2f%%' % (j, res * 100))
 
     """
     ensemble
