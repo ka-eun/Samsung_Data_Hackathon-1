@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from collections import Counter
 import operator
 import random
+from math import exp
 from pprint import pprint
 
 
@@ -37,6 +38,7 @@ def plot_hist(hist):
     acc_ax.legend(loc='lower left')
 
     plt.show()
+
 
 #리스트 inputs을 test,train,validation 세 리스트로 분화하는 함수
 def separateSet(_inputs, _outputs):
@@ -72,31 +74,36 @@ def separateSet(_inputs, _outputs):
 
 
 def majority(votes):  #만들어진 모델들에 대해서 다수결 투표하는 함수
-    # value
-    # rate
     # 투표 개수를 세어서 표결수가 큰 순서대로 정렬한 후 가장 많은 표를 받은 키값
+    # 투표 개수를 세어서 표결수가 큰 순서대로 정렬한 후 가장 많은 표를 받은 키값의 표결수를 투표자 수로 나눔. 즉 비율
     return sorted(Counter(votes).items(), key=operator.itemgetter(1), reverse=True)[0][0],\
-           (sorted(Counter(votes).items(), key=operator.itemgetter(1), reverse=True)[0][1] / len(votes))  #투표 개수를 세어서 표결수가 큰 순서대로 정렬한 후 가장 많은 표를 받은 키값의 표결수를 투표자 수로 나눔. 즉 비율
+           (sorted(Counter(votes).items(), key=operator.itemgetter(1), reverse=True)[0][1] / len(votes))
 
 
 def compare_lists(a, b):
     return sum([1 if a[i] == b[i] else 0 for i in range(len(a))])
 
-def evaluate(n, m):
-	res = 0.0
-	for i, row in enumerate(n):
-		for j, _ in enumerate(n[i]):
-			res += exp(-1 * pow(n[i][j] - m[i][j], 2))
-	return res / (len(n) * len(n[0]))
+
+def evaluate_lists(n, m):
+    res = 0.0
+
+    for i, _ in enumerate(n):
+        for j, _ in enumerate(n[i]):
+            res += exp(-1 * pow(n[i][j] - m[i][j], 2))
+
+    return res / (len(n) * len(n[0]))
+
 
 # TO DO: ensemble
 def createModel(inputs):
     # inputs
     models = []
-    for input in inputs:  #inputs의 열 별로
-        model = Input(shape=(len(input[0]),))  #행은 각 속성의 분류 개수(예:주간,아간은 2)이고 열은 개수에 맞춰서 설정된 행렬
-        models.append(model)
 
+    # inputs의 열 별로
+    for input in inputs:
+        # 행은 각 속성의 분류 개수(예:주간,아간은 2)이고 열은 개수에 맞춰서 설정된 행렬
+        model = Input(shape=(len(input[0]),))
+        models.append(model)
 
     # more layers for each one-hot encoding vector
     _models = []
@@ -138,7 +145,6 @@ def createModel(inputs):
     """
     random parts for ensemble
     """
-
     for _ in range(random.randrange(1, 3)):
         rand = random.randrange(3)
 
@@ -160,10 +166,7 @@ def createModel(inputs):
             x = BatchNormalization()(x)
             x = Activation('tanh')(x)
 
-
     # x = Dropout(0.2)(x)
-
-
 
     # output
     x = Dense(len(outputs[0]))(x)
@@ -183,8 +186,8 @@ if __name__ == "__main__":
     inputs, outputs, input_test, input_train, input_val, output_test, output_train, output_val\
         = separateSet(_inputs, _outputs)  # 범주형 데이터와 사람 수 데이터를 각각 test, train, validate를 위해 분류
 
-    # for ensemble model 10개 필요
-    num_models = 20
+    # for ensemble model
+    num_models = 5
     models = []
 
     # model의 개수만큼 model 생성
@@ -228,8 +231,7 @@ if __name__ == "__main__":
         # print('complete: %s = %.2f%%' % (model.metrics_names[1], score[1] * 100))
         scores.append(score)
 
-        # better than random(0.5)
-        # TO DO: threshold
+        # Threshold 0.8
         if score[1] <= 0.8:
             print('fail: model', j)
 
@@ -249,9 +251,7 @@ if __name__ == "__main__":
             predicts.append(preds)
 
             # 예측값과 실제output값을 비교한 compare_lists를 해당 리스트의 row길이, 개수만큼 나누어 정확도를 구함
-            print('complete: model %d: %.2f%%'
-                  % (j, sum([compare_lists(preds[i], output_test[i])
-                             for i in range(len(preds))], 0.0) / (len(preds) * len(preds[0])) * 100))
+            print('complete: model %d: %.2f%%' % (j, evaluate_lists(preds, output_test) * 100))
 
     """
     ensemble
@@ -300,12 +300,10 @@ if __name__ == "__main__":
         rates.append(_rates)
 
     print(rates)
-    print(results)
-    print(output_test)
+    # print(results)
+    # print(output_test)
 
     """
     evaluate
     """
-    print('finally: %.2f%%'
-          % (sum([compare_lists(results[i], output_test[i])
-                  for i in range(len(results))], 0.0) / (len(results) * len(results[0])) * 100))
+    print('finally: %.2f%%' % (evaluate_lists(results, output_test) * 100))

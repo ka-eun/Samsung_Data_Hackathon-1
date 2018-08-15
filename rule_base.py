@@ -3,11 +3,6 @@ from operator import eq
 from pprint import pprint
 
 
-f = open('./test_kor.csv', 'r')
-f2 = open('./outputTest_kor.csv', 'w', newline='')
-r = csv.reader(f)
-wr = csv.writer(f2)
-
 def find_row9(_row):  # 사고유형_대분류 찾는 함수
     if eq(_row[15], "없음"):
         _row[9] = "차량단독"
@@ -75,24 +70,25 @@ def find_row(_row):
     return _row
 
 
-for row in r:
-    tmp = []
-    for i, elem in enumerate(row):
-        if i<2:
-            tmp.append(elem)
-        elif i>6:
-            tmp.append(elem)
+if __name__ == "__main__":
+    f = open('./test_kor.csv', 'r')
+    f2 = open('./outputTest_kor.csv', 'w', newline='')
+    r = csv.reader(f)
+    wr = csv.writer(f2)
 
-    if '' in tmp:  # tmp의 어느 한 요소라도 비어있으면 빈 리스트를 삽입하고 다음 row를 읽음
-        row = find_row(row)
-        wr.writerow(row)
-    else:
-        wr.writerow(row)
+    for row in r:
+        tmp = []
+        for i, elem in enumerate(row):
+            if i<2:
+                tmp.append(elem)
+            elif i>6:
+                tmp.append(elem)
 
+        if '' in tmp:  # tmp의 어느 한 요소라도 비어있으면 빈 리스트를 삽입하고 다음 row를 읽음
+            row = find_row(row)
+            wr.writerow(row)
+        else:
+            wr.writerow(row)
 
-f.close()
-f2.close()
-
-
-
-
+    f.close()
+    f2.close()
