@@ -194,7 +194,7 @@ if __name__ == "__main__":
         = separateSet(_inputs, _outputs)  # 범주형 데이터와 사람 수 데이터를 각각 test, train, validate를 위해 분류
 
     # for ensemble model
-    num_models = 20
+    num_models = 100
     models = []
 
     # model의 개수만큼 model 생성
@@ -223,7 +223,7 @@ if __name__ == "__main__":
         # train
         # model의 학습 이력 정보로 train의 loss와 accuracy, val의 loss와 accuracy 값을 받음
         hist = model.fit([np.array(i) for i in input_train], np.array(output_train),
-                         epochs=100, batch_size=pow(2, 13),
+                         epochs=1000, batch_size=pow(2, 13),
                          validation_data=([np.array(i) for i in input_val], np.array(output_val)),
                          callbacks=[early_stopping],
                          verbose=2)
