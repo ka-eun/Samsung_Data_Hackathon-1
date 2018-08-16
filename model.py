@@ -194,7 +194,7 @@ if __name__ == "__main__":
         = separateSet(_inputs, _outputs)  # 범주형 데이터와 사람 수 데이터를 각각 test, train, validate를 위해 분류
 
     # for ensemble model
-    num_models = 100
+    num_models = 20
     models = []
 
     # model의 개수만큼 model 생성
