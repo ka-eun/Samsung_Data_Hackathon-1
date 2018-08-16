@@ -11,6 +11,20 @@ def shuffleList(_input, _output):
     return _input, _output
 
 
+# 각 row에서 인자로 받은 index를 제외시킨 리스트를 리턴하는 함수
+def deleteColumn(rows, stopIdx):
+    tmp = []
+    for row in rows:
+        refined = []
+        # 인자로 받은 stopIdx에 해당 index가 있으면 그 값을 제외한 리스트를 tmp에 append
+        for i, elem in enumerate(row):
+            if i not in stopIdx:
+                refined.append(elem)
+        tmp.append(refined)
+
+    return tmp
+
+
 def createTrainFile(file_train='./Kor_Train_교통사망사고정보(12.1~17.6).csv', file_test='./test_kor.csv'):
     f = open(file_train, 'r')
     r = csv.reader(f)
@@ -67,7 +81,7 @@ def oneHotEncoding(length, index):
     return vector
 
 
-def preprocessing(file_train='./Kor_Train_교통사망사고정보(12.1~17.6).csv', file_test='./test_kor.csv'):
+def preprocessing(file_train='./Kor_Train_교통사망사고정보(12.1~17.6).csv', file_test='./test_kor.csv',modelnum=1):
     f = open(file_train, 'r')
     r = csv.reader(f)
 
@@ -102,16 +116,34 @@ def preprocessing(file_train='./Kor_Train_교통사망사고정보(12.1~17.6).cs
         input = []
         output = []
 
-        for i, elem in enumerate(tmp):  # 인덱스로 인풋 아웃풋 분류(2<output<7)
-            if i < 2:
-                input.append(elem)
-            elif i < 7:
-                output.append(int(elem))
-            else:
-                input.append(elem)
+        if modelnum==1:  #model.py
+            for i, elem in enumerate(tmp):  # 인덱스로 인풋 아웃풋 분류(2<output<7)
+                if i < 2:  # 주야,요일
+                    input.append(elem)
+                elif i < 7:
+                    output.append(int(elem))  # 사람 수
+                else:
+                    input.append(elem)  # 나머지
+
+        elif modelnum == 2:  #model2.py
+            for i, elem in enumerate(tmp):
+                if i != 10:
+                    input.append(elem)
+                else:
+                    output.append(elem)
+            #deleteColumn(input, [1, 8])
+            
+        elif modelnum == 3:  #model3.py
+            for i, elem in enumerate(tmp):
+                if i != 11:
+                    input.append(elem)
+                else:
+                    output.append(elem)
+            #deleteColumn(input, [1, 8])
 
         _input_train.append(input)
         output_train.append(output)
+
 
     f.close()
     f2.close()
@@ -142,8 +174,7 @@ def preprocessing(file_train='./Kor_Train_교통사망사고정보(12.1~17.6).cs
 
     for i, B in enumerate(input_set):
         for j, b in enumerate(B):
-            dic_list[i][b] = oneHotEncoding(input_count[i],
-                                            j)  # i번째 attribute에 해당되는 dictionary에서 키값을 b로 하는 벡터화된 value를 맵핑
+            dic_list[i][b] = oneHotEncoding(input_count[i],j)  # i번째 attribute에 해당되는 dictionary에서 키값을 b로 하는 벡터화된 value를 맵핑
 
     dic_list.append(dic_list[len(dic_list) - 1])  # input_count와 크기를 맞춰주기 위해 마지막번째 attribute에 병합된 set을 추가
 
@@ -158,22 +189,10 @@ def preprocessing(file_train='./Kor_Train_교통사망사고정보(12.1~17.6).cs
     return input_train, output_train, dic_list
 
 
-# 각 row에서 인자로 받은 index를 제외시킨 리스트를 리턴하는 함수
-def deleteColumn(rows, stopIdx):
-    tmp = []
-    for row in rows:
-        refined = []
-        # 인자로 받은 stopIdx에 해당 index가 있으면 그 값을 제외한 리스트를 tmp에 append
-        for i, elem in enumerate(row):
-            if i not in stopIdx:
-                refined.append(elem)
-        tmp.append(refined)
-
-    return tmp
 
 
 if __name__ == "__main__":
-    train_input, train_output, dicts = preprocessing()
+    train_input, train_output, dicts = preprocessing('./Kor_Train_교통사망사고정보(12.1~17.6).csv', './test_kor.csv',1)
     createTrainFile()
     print(train_input)
     print(train_output)
