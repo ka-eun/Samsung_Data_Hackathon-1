@@ -176,7 +176,7 @@ def createModel(inputs):
 
 
 if __name__ == "__main__":
-    _inputs, _outputs, _ = preprocessing()  # 범주형 데이터 리스트, 사람 수 데이터 리스트, 벡터화 dictionary
+    _inputs, _outputs, _ = preprocessing('./Kor_Train_교통사망사고정보(12.1~17.6).csv', './test_kor.csv',1)  # 범주형 데이터 리스트, 사람 수 데이터 리스트, 벡터화 dictionary
 
     # delete columns
     _inputs = deleteColumn(_inputs, [3, 4, 7])  # 범주형 데이터에서 발생지시군구, 사고유형대분류, 도로형태대분류 column 제외
