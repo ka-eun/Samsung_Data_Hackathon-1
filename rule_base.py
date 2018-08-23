@@ -1,6 +1,7 @@
 import csv
 from operator import eq
-from pprint import pprint
+import os
+# from pprint import pprint
 
 
 def find_row9(_row):  # 사고유형_대분류 찾는 함수
@@ -70,21 +71,25 @@ def find_row(_row):
     return _row
 
 
-if __name__ == "__main__":
+def main_1():
+    if not os.path.isdir('./outputs'):
+        os.mkdir('./outputs')
+
     f = open('./test_kor.csv', 'r')
-    f2 = open('./outputTest_kor.csv', 'w', newline='')
+    f2 = open('./outputs/1_output.csv', 'w', newline='')
     r = csv.reader(f)
     wr = csv.writer(f2)
 
     for row in r:
         tmp = []
         for i, elem in enumerate(row):
-            if i<2:
+            if i < 2:
                 tmp.append(elem)
-            elif i>6:
+            elif i > 6:
                 tmp.append(elem)
 
-        if '' in tmp:  # tmp의 어느 한 요소라도 비어있으면 빈 리스트를 삽입하고 다음 row를 읽음
+        # tmp의 어느 한 요소라도 비어있으면 빈 리스트를 삽입하고 다음 row를 읽음
+        if '' in tmp:
             row = find_row(row)
             wr.writerow(row)
         else:
@@ -92,3 +97,7 @@ if __name__ == "__main__":
 
     f.close()
     f2.close()
+
+
+if __name__ == "__main__":
+    main_1()
